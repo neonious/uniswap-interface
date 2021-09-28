@@ -1,13 +1,10 @@
 import { ChainId, Currency } from '@uniswap/sdk-core'
 import React, { useMemo } from 'react'
 import styled from 'styled-components/macro'
-import EthereumLogo from '../../assets/images/ethereum-logo.png'
+import EthereumLogo from '../../assets/images/matic.svg'
 import useHttpLocations from '../../hooks/useHttpLocations'
 import { WrappedTokenInfo } from '../../state/lists/wrappedTokenInfo'
 import Logo from '../Logo'
-
-export const getTokenLogoURL = (address: string) =>
-  `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`
 
 const StyledEthereumLogo = styled.img<{ size: string }>`
   width: ${({ size }) => size};
@@ -24,6 +21,8 @@ const StyledLogo = styled(Logo)<{ size: string }>`
   background-color: ${({ theme }) => theme.white};
 `
 
+import QUICKSWAP_LIST from 'quickswap-default-token-list'
+
 export default function CurrencyLogo({
   currency,
   size = '24px',
@@ -34,18 +33,29 @@ export default function CurrencyLogo({
   size?: string
   style?: React.CSSProperties
 }) {
-  const uriLocations = useHttpLocations(currency instanceof WrappedTokenInfo ? currency.logoURI : undefined)
+  let uri: any;
+  if(currency instanceof WrappedTokenInfo && currency.logoURI)
+    uri = currency.logoURI;
+
+  // Hack here cause not sure how to fix nicely
+  else if(currency && currency.symbol == 'MDSIM') uri = 'https://www.neonious.org/main/Neonious-Icon-64.png';
+  else if(currency)
+    for(let i = 0; i < QUICKSWAP_LIST.tokens.length; i++) {
+      if(QUICKSWAP_LIST.tokens[i].symbol == currency.symbol) {
+        uri = QUICKSWAP_LIST.tokens[i].logoURI;
+        break;
+      }
+    }
+    if(!uri)
+    console.log("FOR ", currency)
+
+  const uriLocations = useHttpLocations(uri);
 
   const srcs: string[] = useMemo(() => {
     if (!currency || currency.isEther) return []
 
-    if (currency.isToken) {
-      const defaultUrls = currency.chainId === ChainId.MAINNET ? [getTokenLogoURL(currency.address)] : []
-      if (currency instanceof WrappedTokenInfo) {
-        return [...uriLocations, ...defaultUrls]
-      }
-      return defaultUrls
-    }
+    if (uriLocations)
+      return [...uriLocations]
     return []
   }, [currency, uriLocations])
 

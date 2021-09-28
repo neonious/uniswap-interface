@@ -1,14 +1,11 @@
 import { Currency, Token, CurrencyAmount } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import { useMemo } from 'react'
-import { UNI } from '../../constants/tokens'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { useAllTokens } from '../../hooks/Tokens'
 import { useMulticall2Contract } from '../../hooks/useContract'
 import { isAddress } from '../../utils'
-import { useUserUnclaimedAmount } from '../claim/hooks'
 import { useMultipleContractSingleData, useSingleContractMultipleData } from '../multicall/hooks'
-import { useTotalUniEarned } from '../stake/hooks'
 import { Interface } from '@ethersproject/abi'
 import ERC20ABI from 'abis/erc20.json'
 import { Erc20Interface } from 'abis/types/Erc20'
@@ -145,21 +142,5 @@ export function useAllTokenBalances(): { [tokenAddress: string]: CurrencyAmount<
 
 // get the total owned, unclaimed, and unharvested UNI for account
 export function useAggregateUniBalance(): CurrencyAmount<Token> | undefined {
-  const { account, chainId } = useActiveWeb3React()
-
-  const uni = chainId ? UNI[chainId] : undefined
-
-  const uniBalance: CurrencyAmount<Token> | undefined = useTokenBalance(account ?? undefined, uni)
-  const uniUnclaimed: CurrencyAmount<Token> | undefined = useUserUnclaimedAmount(account)
-  const uniUnHarvested: CurrencyAmount<Token> | undefined = useTotalUniEarned()
-
-  if (!uni) return undefined
-
-  return CurrencyAmount.fromRawAmount(
-    uni,
-    JSBI.add(
-      JSBI.add(uniBalance?.quotient ?? JSBI.BigInt(0), uniUnclaimed?.quotient ?? JSBI.BigInt(0)),
-      uniUnHarvested?.quotient ?? JSBI.BigInt(0)
-    )
-  )
+  return undefined
 }

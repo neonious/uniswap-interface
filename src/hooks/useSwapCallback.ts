@@ -1,9 +1,9 @@
 import { BigNumber } from '@ethersproject/bignumber'
-import { Router, Trade as V2Trade } from '@uniswap/v2-sdk'
+import { Router } from 'quickswap-sdk'
+import { Trade as V2Trade } from '@uniswap/v2-sdk'
 import { SwapRouter, Trade as V3Trade } from '@uniswap/v3-sdk'
 import { ChainId, Currency, Percent, TradeType } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
-import { SWAP_ROUTER_ADDRESSES } from '../constants/addresses'
 import { calculateGasMargin } from '../utils/calculateGasMargin'
 import { getTradeVersion } from '../utils/getTradeVersion'
 import { useTransactionAdder } from '../state/transactions/hooks'
@@ -13,7 +13,6 @@ import { useActiveWeb3React } from './web3'
 import { useV2RouterContract } from './useContract'
 import { SignatureData } from './useERC20Permit'
 import useTransactionDeadline from './useTransactionDeadline'
-import useENS from './useENS'
 import { Version } from './useToggledVersion'
 
 export enum SwapCallbackState {
@@ -57,7 +56,7 @@ function useSwapCallArguments(
 ): SwapCall[] {
   const { account, chainId, library } = useActiveWeb3React()
 
-  const { address: recipientAddress } = useENS(recipientAddressOrName)
+  const recipientAddress = recipientAddressOrName
   const recipient = recipientAddressOrName === null ? account : recipientAddress
   const deadline = useTransactionDeadline()
   const routerContract = useV2RouterContract()
@@ -65,25 +64,25 @@ function useSwapCallArguments(
   return useMemo(() => {
     if (!trade || !recipient || !library || !account || !chainId || !deadline) return []
 
-    if (trade instanceof V2Trade) {
+    if (trade) {
       if (!routerContract) return []
       const swapMethods = []
       swapMethods.push(
-        Router.swapCallParameters(trade, {
+        Router.swapCallParameters(trade as any, {
           feeOnTransfer: false,
-          allowedSlippage,
+          allowedSlippage: allowedSlippage as any,
           recipient,
-          deadline: deadline.toNumber(),
+          ttl: deadline.toNumber() as any,
         })
       )
 
       if (trade.tradeType === TradeType.EXACT_INPUT) {
         swapMethods.push(
-          Router.swapCallParameters(trade, {
+          Router.swapCallParameters(trade as any, {
             feeOnTransfer: true,
-            allowedSlippage,
+            allowedSlippage: allowedSlippage as any,
             recipient,
-            deadline: deadline.toNumber(),
+            ttl: deadline.toNumber() as any,
           })
         )
       }
@@ -92,45 +91,7 @@ function useSwapCallArguments(
         calldata: routerContract.interface.encodeFunctionData(methodName, args),
         value,
       }))
-    } else {
-      // trade is V3Trade
-      const swapRouterAddress = SWAP_ROUTER_ADDRESSES[chainId as ChainId]
-      if (!swapRouterAddress) return []
-
-      const { value, calldata } = SwapRouter.swapCallParameters(trade, {
-        recipient,
-        slippageTolerance: allowedSlippage,
-        deadline: deadline.toString(),
-        ...(signatureData
-          ? {
-              inputTokenPermit:
-                'allowed' in signatureData
-                  ? {
-                      expiry: signatureData.deadline,
-                      nonce: signatureData.nonce,
-                      s: signatureData.s,
-                      r: signatureData.r,
-                      v: signatureData.v as any,
-                    }
-                  : {
-                      deadline: signatureData.deadline,
-                      amount: signatureData.amount,
-                      s: signatureData.s,
-                      r: signatureData.r,
-                      v: signatureData.v as any,
-                    },
-            }
-          : {}),
-      })
-
-      return [
-        {
-          address: swapRouterAddress,
-          calldata,
-          value,
-        },
-      ]
-    }
+    } else return []
   }, [account, allowedSlippage, chainId, deadline, library, recipient, routerContract, signatureData, trade])
 }
 
@@ -191,7 +152,7 @@ export function useSwapCallback(
 
   const addTransaction = useTransactionAdder()
 
-  const { address: recipientAddress } = useENS(recipientAddressOrName)
+  const recipientAddress = recipientAddressOrName
   const recipient = recipientAddressOrName === null ? account : recipientAddress
 
   return useMemo(() => {

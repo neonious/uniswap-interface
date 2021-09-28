@@ -1,0 +1,24 @@
+{
+    "name": "Neonious",
+    "timestamp": "2021-07-01T00:00:00+00:00",
+    "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+    },
+    "keywords": [
+        "neonious",
+        "mdsim"
+    ],
+    "tokens": [
+        {
+            "address": "0xDa48C42517AFfB3BF3FC13CE26561092e1a61A80",
+            "chainId": 1,
+            "name": "Neonious Token",
+            "symbol": "MDSIM",
+            "decimals": 18,
+            "logoURI": "https://www.neonious.org/main/Neonious-Icon-64.png"
+        }
+    ],
+    "logoURI": "https://www.neonious.org/main/Neonious-Icon-256.png"
+}

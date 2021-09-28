@@ -149,5 +149,7 @@
     ]
   },
   "license": "GPL-3.0-or-later",
-  "dependencies": {}
+  "dependencies": {
+    "quickswap-default-token-list": "^1.1.5"
+  }
 }

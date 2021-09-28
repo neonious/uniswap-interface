@@ -2,20 +2,19 @@ import React, { useMemo, useState } from 'react'
 import { Position } from '@uniswap/v3-sdk'
 import Badge from 'components/Badge'
 import DoubleCurrencyLogo from 'components/DoubleLogo'
-import { usePool } from 'hooks/usePools'
 import { useToken } from 'hooks/Tokens'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components/macro'
 import { HideSmall, MEDIA_WIDTHS, SmallOnly } from 'theme'
 import { PositionDetails } from 'types/position'
-import { WETH9, Price, Token, Percent } from '@uniswap/sdk-core'
+import { Price, Token, Percent } from '@uniswap/sdk-core'
 import { formatPrice } from 'utils/formatTokenAmount'
 import Loader from 'components/Loader'
 import { unwrappedToken } from 'utils/wrappedCurrency'
 import RangeBadge from 'components/Badge/RangeBadge'
 import { RowFixed } from 'components/Row'
 import HoverInlineText from 'components/HoverInlineText'
-import { DAI, USDC, USDT, WBTC } from '../../constants/tokens'
+import { DAI, USDC, USDT, WBTC, WMATIC, WETH } from '../../constants/tokens'
 
 const Row = styled(Link)`
   align-items: center;
@@ -145,7 +144,7 @@ export function getPriceOrderingFromPositionForUI(
   }
 
   // if token1 is an ETH-/BTC-stable asset, set it as the base token
-  const bases = [...Object.values(WETH9), WBTC]
+  const bases = [WMATIC, WETH, WBTC]
   if (bases.some((base) => base.equals(token1))) {
     return {
       priceLower: position.token0PriceUpper.invert(),
@@ -190,15 +189,9 @@ export default function PositionListItem({ positionDetails }: PositionListItemPr
   const currency0 = token0 ? unwrappedToken(token0) : undefined
   const currency1 = token1 ? unwrappedToken(token1) : undefined
 
-  // construct Position from details returned
-  const [, pool] = usePool(currency0 ?? undefined, currency1 ?? undefined, feeAmount)
-
   const position = useMemo(() => {
-    if (pool) {
-      return new Position({ pool, liquidity: liquidity.toString(), tickLower, tickUpper })
-    }
     return undefined
-  }, [liquidity, pool, tickLower, tickUpper])
+  }, [liquidity, tickLower, tickUpper])
 
   // prices
   let { priceLower, priceUpper, base, quote } = getPriceOrderingFromPositionForUI(position)
@@ -207,7 +200,7 @@ export default function PositionListItem({ positionDetails }: PositionListItemPr
   const currencyBase = inverted ? currency0 : currency1
 
   // check if price is within range
-  const outOfRange: boolean = pool ? pool.tickCurrent < tickLower || pool.tickCurrent >= tickUpper : false
+  const outOfRange: boolean = false
 
   const positionSummaryLink = '/pool/' + positionDetails.tokenId
 

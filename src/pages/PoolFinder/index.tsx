@@ -60,8 +60,8 @@ export default function PoolFinder() {
         JSBI.equal(pair.reserve1.quotient, JSBI.BigInt(0))
     )
 
-  const position: CurrencyAmount<Token> | undefined = useTokenBalance(account ?? undefined, pair?.liquidityToken)
-  const hasPosition = Boolean(position && JSBI.greaterThan(position.quotient, JSBI.BigInt(0)))
+  const position: CurrencyAmount<Token> | undefined = useTokenBalance(account ?? undefined, pair?.liquidityToken as any)
+  const hasPosition = Boolean(position && JSBI.greaterThan(position.quotient as any, JSBI.BigInt(0)))
 
   const handleCurrencySelect = useCallback(
     (currency: Currency) => {

@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, AppState } from '../index'
 import { Field, typeInput } from './actions'
-import { Pair } from '@uniswap/v2-sdk'
+import { Pair } from 'quickswap-sdk'
 import { Currency, Token, Percent, Price, CurrencyAmount } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import { PairState, useV2Pair } from '../../hooks/useV2Pairs'
@@ -80,11 +80,11 @@ export function useDerivedMintInfo(
 
   // pair
   const [pairState, pair] = useV2Pair(currencies[Field.CURRENCY_A], currencies[Field.CURRENCY_B])
-  const totalSupply = useTotalSupply(pair?.liquidityToken)
+  const totalSupply = useTotalSupply(pair?.liquidityToken as any)
 
   const noLiquidity: boolean =
     pairState === PairState.NOT_EXISTS ||
-    Boolean(totalSupply && JSBI.equal(totalSupply.quotient, ZERO)) ||
+    Boolean(totalSupply && JSBI.equal(totalSupply.quotient as any, ZERO)) ||
     Boolean(
       pairState === PairState.EXISTS &&
         pair &&
@@ -121,9 +121,9 @@ export function useDerivedMintInfo(
         const dependentCurrency = dependentField === Field.CURRENCY_B ? currencyB : currencyA
         const dependentTokenAmount =
           dependentField === Field.CURRENCY_B
-            ? pair.priceOf(tokenA).quote(wrappedIndependentAmount)
-            : pair.priceOf(tokenB).quote(wrappedIndependentAmount)
-        return dependentCurrency?.isEther ? CurrencyAmount.ether(dependentTokenAmount.quotient) : dependentTokenAmount
+            ? pair.priceOf(tokenA).quote(wrappedIndependentAmount as any)
+            : pair.priceOf(tokenB).quote(wrappedIndependentAmount as any)
+        return dependentCurrency?.isEther ? CurrencyAmount.ether(dependentTokenAmount.quotient as any) as any : dependentTokenAmount
       }
       return undefined
     } else {
@@ -161,10 +161,10 @@ export function useDerivedMintInfo(
     ]
     if (pair && totalSupply && tokenAmountA && tokenAmountB) {
       try {
-        return pair.getLiquidityMinted(totalSupply, tokenAmountA, tokenAmountB)
+        return pair.getLiquidityMinted(totalSupply as any, tokenAmountA as any, tokenAmountB as any)
       } catch (error) {
         if (error.InsufficientInputAmountError) {
-          return CurrencyAmount.fromRawAmount(pair.liquidityToken, ZERO)
+          return CurrencyAmount.fromRawAmount(pair.liquidityToken as any, ZERO as any)
         }
         return undefined
       }
@@ -174,7 +174,7 @@ export function useDerivedMintInfo(
 
   const poolTokenPercentage = useMemo(() => {
     if (liquidityMinted && totalSupply) {
-      return new Percent(liquidityMinted.quotient, totalSupply.add(liquidityMinted).quotient)
+      return new Percent(liquidityMinted.quotient as any, totalSupply.add(liquidityMinted).quotient as any)
     } else {
       return undefined
     }

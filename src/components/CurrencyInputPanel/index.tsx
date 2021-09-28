@@ -1,4 +1,4 @@
-import { Pair } from '@uniswap/v2-sdk'
+import { Pair } from '../../quickswap-sdk'
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core'
 import React, { useState, useCallback } from 'react'
 import styled from 'styled-components/macro'
@@ -222,7 +222,7 @@ export default function CurrencyInputPanel({
               <RowFixed>
                 {pair ? (
                   <span style={{ marginRight: '0.5rem' }}>
-                    <DoubleCurrencyLogo currency0={pair.token0} currency1={pair.token1} size={24} margin={true} />
+                    <DoubleCurrencyLogo currency0={pair.token0 as Token} currency1={pair.token1 as Token} size={24} margin={true} />
                   </span>
                 ) : currency ? (
                   <CurrencyLogo style={{ marginRight: '0.5rem' }} currency={currency} size={'24px'} />

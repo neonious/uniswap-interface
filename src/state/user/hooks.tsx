@@ -1,5 +1,5 @@
 import { ChainId, Percent, Token } from '@uniswap/sdk-core'
-import { Pair } from '@uniswap/v2-sdk'
+import { Pair } from '../../quickswap-sdk'
 import JSBI from 'jsbi'
 import flatMap from 'lodash.flatmap'
 import { useCallback, useMemo } from 'react'
@@ -44,18 +44,7 @@ function deserializeToken(serializedToken: SerializedToken): Token {
 }
 
 export function useIsDarkMode(): boolean {
-  const { userDarkMode, matchesDarkMode } = useSelector<
-    AppState,
-    { userDarkMode: boolean | null; matchesDarkMode: boolean }
-  >(
-    ({ user: { matchesDarkMode, userDarkMode } }) => ({
-      userDarkMode,
-      matchesDarkMode,
-    }),
-    shallowEqual
-  )
-
-  return userDarkMode === null ? matchesDarkMode : userDarkMode
+  return true;
 }
 
 export function useDarkModeManager(): [boolean, () => void] {
@@ -196,8 +185,8 @@ export function useUserAddedTokens(): Token[] {
 
 function serializePair(pair: Pair): SerializedPair {
   return {
-    token0: serializeToken(pair.token0),
-    token1: serializeToken(pair.token1),
+    token0: serializeToken(pair.token0 as any),
+    token1: serializeToken(pair.token1 as any),
   }
 }
 
@@ -274,7 +263,7 @@ export function useTrackedTokenPairs(): [Token, Token][] {
     if (!forChain) return []
 
     return Object.keys(forChain).map((pairId) => {
-      return [deserializeToken(forChain[pairId].token0), deserializeToken(forChain[pairId].token1)]
+      return [deserializeToken(forChain[pairId].token0 as any), deserializeToken(forChain[pairId].token1 as any)]
     })
   }, [savedSerializedPairs, chainId])
 

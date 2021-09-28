@@ -4,12 +4,10 @@ import { Trade as V2Trade } from '@uniswap/v2-sdk'
 import { Trade as V3Trade } from '@uniswap/v3-sdk'
 import { splitSignature } from 'ethers/lib/utils'
 import { useMemo, useState } from 'react'
-import { SWAP_ROUTER_ADDRESSES } from '../constants/addresses'
-import { DAI, UNI, USDC } from '../constants/tokens'
+import { DAI, USDC } from '../constants/tokens'
 import { useSingleCallResult } from '../state/multicall/hooks'
 import { useActiveWeb3React } from './web3'
 import { useEIP2612Contract } from './useContract'
-import useIsArgentWallet from './useIsArgentWallet'
 import useTransactionDeadline from './useTransactionDeadline'
 
 enum PermitType {
@@ -29,28 +27,13 @@ interface PermitInfo {
 
 // todo: read this information from extensions on token lists or elsewhere (permit registry?)
 const PERMITTABLE_TOKENS: {
-  [chainId in ChainId]: {
+  [chainId in any]: {
     [checksummedTokenAddress: string]: PermitInfo
   }
 } = {
-  [ChainId.MAINNET]: {
+  [137]: {
     [USDC.address]: { type: PermitType.AMOUNT, name: 'USD Coin', version: '2' },
     [DAI.address]: { type: PermitType.ALLOWED, name: 'Dai Stablecoin', version: '1' },
-    [UNI[ChainId.MAINNET].address]: { type: PermitType.AMOUNT, name: 'Uniswap' },
-  },
-  [ChainId.RINKEBY]: {
-    ['0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735']: { type: PermitType.ALLOWED, name: 'Dai Stablecoin', version: '1' },
-    [UNI[ChainId.RINKEBY].address]: { type: PermitType.AMOUNT, name: 'Uniswap' },
-  },
-  [ChainId.ROPSTEN]: {
-    [UNI[ChainId.ROPSTEN].address]: { type: PermitType.AMOUNT, name: 'Uniswap' },
-    ['0x07865c6E87B9F70255377e024ace6630C1Eaa37F']: { type: PermitType.AMOUNT, name: 'USD Coin', version: '2' },
-  },
-  [ChainId.GÖRLI]: {
-    [UNI[ChainId.GÖRLI].address]: { type: PermitType.AMOUNT, name: 'Uniswap' },
-  },
-  [ChainId.KOVAN]: {
-    [UNI[ChainId.KOVAN].address]: { type: PermitType.AMOUNT, name: 'Uniswap' },
   },
 }
 
@@ -127,7 +110,7 @@ export function useERC20Permit(
   const transactionDeadline = useTransactionDeadline()
   const tokenAddress = currencyAmount?.currency?.isToken ? currencyAmount.currency.address : undefined
   const eip2612Contract = useEIP2612Contract(tokenAddress)
-  const isArgentWallet = useIsArgentWallet()
+  const isArgentWallet = false
   const nonceInputs = useMemo(() => [account ?? undefined], [account])
   const tokenNonceState = useSingleCallResult(eip2612Contract, 'nonces', nonceInputs)
   const permitInfo =
@@ -172,7 +155,7 @@ export function useERC20Permit(
       signatureData.tokenAddress === tokenAddress &&
       signatureData.nonce === nonceNumber &&
       signatureData.spender === spender &&
-      ('allowed' in signatureData || JSBI.equal(JSBI.BigInt(signatureData.amount), currencyAmount.quotient))
+      ('allowed' in signatureData || JSBI.equal(JSBI.BigInt(signatureData.amount) as any, currencyAmount.quotient as any)) as any
 
     return {
       state: isSignatureDataValid ? UseERC20PermitState.SIGNED : UseERC20PermitState.NOT_SIGNED,
@@ -271,11 +254,10 @@ export function useV2LiquidityTokenPermit(
 }
 
 export function useERC20PermitFromTrade(
-  trade: V2Trade<Currency, Currency, TradeType> | V3Trade<Currency, Currency, TradeType> | undefined,
+  trade: V2Trade<Currency, Currency, TradeType> | undefined,
   allowedSlippage: Percent
 ) {
   const { chainId } = useActiveWeb3React()
-  const swapRouterAddress = SWAP_ROUTER_ADDRESSES[chainId as ChainId]
   const amountToApprove = useMemo(() => (trade ? trade.maximumAmountIn(allowedSlippage) : undefined), [
     trade,
     allowedSlippage,
@@ -284,7 +266,7 @@ export function useERC20PermitFromTrade(
   return useERC20Permit(
     amountToApprove,
     // v2 router does not support
-    trade instanceof V2Trade ? undefined : trade instanceof V3Trade ? swapRouterAddress : undefined,
+    undefined,
     null
   )
 }

@@ -1,4 +1,4 @@
-import { Currency, currencyEquals, WETH9 } from '@uniswap/sdk-core'
+import { Currency, Token, currencyEquals } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
 import { tryParseAmount } from '../state/swap/hooks'
 import { useTransactionAdder } from '../state/transactions/hooks'
@@ -19,6 +19,9 @@ const NOT_APPLICABLE = { wrapType: WrapType.NOT_APPLICABLE }
  * @param outputCurrency the selected output currency
  * @param typedValue the user input value
  */
+
+export const WMATIC = new Token(137, '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270', 18, 'WMATIC', 'Wrapped MATIC')
+
 export default function useWrapCallback(
   inputCurrency: Currency | undefined,
   outputCurrency: Currency | undefined,
@@ -37,7 +40,7 @@ export default function useWrapCallback(
     const hasInputAmount = Boolean(inputAmount?.greaterThan('0'))
     const sufficientBalance = inputAmount && balance && !balance.lessThan(inputAmount)
 
-    if (inputCurrency.isEther && currencyEquals(WETH9[chainId], outputCurrency)) {
+    if (inputCurrency.isEther && currencyEquals(WMATIC, outputCurrency)) {
       return {
         wrapType: WrapType.WRAP,
         execute:
@@ -45,15 +48,15 @@ export default function useWrapCallback(
             ? async () => {
                 try {
                   const txReceipt = await wethContract.deposit({ value: `0x${inputAmount.quotient.toString(16)}` })
-                  addTransaction(txReceipt, { summary: `Wrap ${inputAmount.toSignificant(6)} ETH to WETH` })
+                  addTransaction(txReceipt, { summary: `Wrap ${inputAmount.toSignificant(6)} MATIC to WMATIC` })
                 } catch (error) {
                   console.error('Could not deposit', error)
                 }
               }
             : undefined,
-        inputError: sufficientBalance ? undefined : hasInputAmount ? 'Insufficient ETH balance' : 'Enter ETH amount',
+        inputError: sufficientBalance ? undefined : hasInputAmount ? 'Insufficient MATIC balance' : 'Enter MATIC amount',
       }
-    } else if (currencyEquals(WETH9[chainId], inputCurrency) && outputCurrency.isEther) {
+    } else if (currencyEquals(WMATIC, inputCurrency) && outputCurrency.isEther) {
       return {
         wrapType: WrapType.UNWRAP,
         execute:
@@ -61,13 +64,13 @@ export default function useWrapCallback(
             ? async () => {
                 try {
                   const txReceipt = await wethContract.withdraw(`0x${inputAmount.quotient.toString(16)}`)
-                  addTransaction(txReceipt, { summary: `Unwrap ${inputAmount.toSignificant(6)} WETH to ETH` })
+                  addTransaction(txReceipt, { summary: `Unwrap ${inputAmount.toSignificant(6)} WMATIC to MATIC` })
                 } catch (error) {
                   console.error('Could not withdraw', error)
                 }
               }
             : undefined,
-        inputError: sufficientBalance ? undefined : hasInputAmount ? 'Insufficient WETH balance' : 'Enter WETH amount',
+        inputError: sufficientBalance ? undefined : hasInputAmount ? 'Insufficient WMATIC balance' : 'Enter WMATIC amount',
       }
     } else {
       return NOT_APPLICABLE

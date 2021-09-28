@@ -1,7 +1,7 @@
 import JSBI from 'jsbi'
 import React, { useState } from 'react'
 import { Percent, CurrencyAmount, Token } from '@uniswap/sdk-core'
-import { Pair } from '@uniswap/v2-sdk'
+import { Pair } from '../../quickswap-sdk'
 import { ChevronDown, ChevronUp } from 'react-feather'
 import { Link } from 'react-router-dom'
 import { Text } from 'rebass'
@@ -45,13 +45,13 @@ interface PositionCardProps {
 export default function V2PositionCard({ pair, border, stakedBalance }: PositionCardProps) {
   const { account } = useActiveWeb3React()
 
-  const currency0 = unwrappedToken(pair.token0)
-  const currency1 = unwrappedToken(pair.token1)
+  const currency0 = unwrappedToken(pair.token0 as any)
+  const currency1 = unwrappedToken(pair.token1 as any)
 
   const [showMore, setShowMore] = useState(false)
 
-  const userDefaultPoolBalance = useTokenBalance(account ?? undefined, pair.liquidityToken)
-  const totalPoolTokens = useTotalSupply(pair.liquidityToken)
+  const userDefaultPoolBalance = useTokenBalance(account ?? undefined, pair.liquidityToken as any)
+  const totalPoolTokens = useTotalSupply(pair.liquidityToken as any)
 
   // if staked balance balance provided, add to standard liquidity amount
   const userPoolBalance = stakedBalance ? userDefaultPoolBalance?.add(stakedBalance) : userDefaultPoolBalance
@@ -59,7 +59,7 @@ export default function V2PositionCard({ pair, border, stakedBalance }: Position
   const poolTokenPercentage =
     !!userPoolBalance &&
     !!totalPoolTokens &&
-    JSBI.greaterThanOrEqual(totalPoolTokens.quotient, userPoolBalance.quotient)
+    JSBI.greaterThanOrEqual(totalPoolTokens.quotient as any, userPoolBalance.quotient as any) as any
       ? new Percent(userPoolBalance.quotient, totalPoolTokens.quotient)
       : undefined
 
@@ -68,14 +68,14 @@ export default function V2PositionCard({ pair, border, stakedBalance }: Position
     !!totalPoolTokens &&
     !!userPoolBalance &&
     // this condition is a short-circuit in the case where useTokenBalance updates sooner than useTotalSupply
-    JSBI.greaterThanOrEqual(totalPoolTokens.quotient, userPoolBalance.quotient)
+    JSBI.greaterThanOrEqual(totalPoolTokens.quotient as any, userPoolBalance.quotient as any) as any
       ? [
-          pair.getLiquidityValue(pair.token0, totalPoolTokens, userPoolBalance, false),
-          pair.getLiquidityValue(pair.token1, totalPoolTokens, userPoolBalance, false),
+          pair.getLiquidityValue(pair.token0 as any, totalPoolTokens as any, userPoolBalance as any, false),
+          pair.getLiquidityValue(pair.token1 as any, totalPoolTokens as any, userPoolBalance as any, false),
         ]
       : [undefined, undefined]
 
-  const backgroundColor = useColor(pair?.token0)
+  const backgroundColor = useColor(pair?.token0 as any)
 
   return (
     <StyledPositionCard border={border} bgColor={backgroundColor}>
@@ -177,7 +177,7 @@ export default function V2PositionCard({ pair, border, stakedBalance }: Position
               </Text>
             </FixedHeightRow>
 
-            {userDefaultPoolBalance && JSBI.greaterThan(userDefaultPoolBalance.quotient, BIG_INT_ZERO) && (
+            {userDefaultPoolBalance && JSBI.greaterThan(userDefaultPoolBalance.quotient as any, BIG_INT_ZERO) as any && (
               <RowBetween marginTop="10px">
                 <ButtonPrimary
                   padding="8px"

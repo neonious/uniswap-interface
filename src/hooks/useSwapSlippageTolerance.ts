@@ -13,8 +13,7 @@ export default function useSwapSlippageTolerance(
 ): Percent {
   const defaultSlippageTolerance = useMemo(() => {
     if (!trade) return ONE_TENTHS_PERCENT
-    if (trade instanceof V2Trade) return V2_SWAP_DEFAULT_SLIPPAGE
-    return V3_SWAP_DEFAULT_SLIPPAGE
+    return V2_SWAP_DEFAULT_SLIPPAGE
   }, [trade])
   return useUserSlippageToleranceWithDefault(defaultSlippageTolerance)
 }

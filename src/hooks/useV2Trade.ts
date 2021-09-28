@@ -1,5 +1,6 @@
 import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
-import { Pair, Trade } from '@uniswap/v2-sdk'
+import { Pair, Trade } from 'quickswap-sdk'
+import { Trade as V2Trade } from '@uniswap/v2-sdk'
 import { useMemo } from 'react'
 import { isTradeBetter } from 'utils/isTradeBetter'
 import { BETTER_TRADE_LESS_HOPS_THRESHOLD } from '../constants/misc'
@@ -8,7 +9,6 @@ import { PairState, useV2Pairs } from './useV2Pairs'
 
 function useAllCommonPairs(currencyA?: Currency, currencyB?: Currency): Pair[] {
   const allCurrencyCombinations = useAllCurrencyCombinations(currencyA, currencyB)
-
   const allPairs = useV2Pairs(allCurrencyCombinations)
 
   // only pass along valid pairs, non-duplicated pairs
@@ -37,33 +37,33 @@ export function useV2TradeExactIn(
   currencyAmountIn?: CurrencyAmount<Currency>,
   currencyOut?: Currency,
   { maxHops = MAX_HOPS } = {}
-): Trade<Currency, Currency, TradeType.EXACT_INPUT> | null {
+): V2Trade<Currency, Currency, TradeType.EXACT_INPUT> | null {
   const allowedPairs = useAllCommonPairs(currencyAmountIn?.currency, currencyOut)
 
   return useMemo(() => {
     if (currencyAmountIn && currencyOut && allowedPairs.length > 0) {
       if (maxHops === 1) {
         return (
-          Trade.bestTradeExactIn(allowedPairs, currencyAmountIn, currencyOut, { maxHops: 1, maxNumResults: 1 })[0] ??
+          Trade.bestTradeExactIn(allowedPairs as any, currencyAmountIn as any, currencyOut as any, { maxHops: 1, maxNumResults: 1 })[0] as any ??
           null
-        )
+        ) as any
       }
       // search through trades with varying hops, find best trade out of them
-      let bestTradeSoFar: Trade<Currency, Currency, TradeType.EXACT_INPUT> | null = null
+      let bestTradeSoFar: V2Trade<Currency, Currency, TradeType.EXACT_INPUT> | null = null
       for (let i = 1; i <= maxHops; i++) {
-        const currentTrade: Trade<Currency, Currency, TradeType.EXACT_INPUT> | null =
-          Trade.bestTradeExactIn(allowedPairs, currencyAmountIn, currencyOut, { maxHops: i, maxNumResults: 1 })[0] ??
+        const currentTrade: V2Trade<Currency, Currency, TradeType.EXACT_INPUT> | null =
+          Trade.bestTradeExactIn(allowedPairs as any, currencyAmountIn as any, currencyOut as any, { maxHops: i, maxNumResults: 1 })[0] as any ??
           null
         // if current trade is best yet, save it
         if (isTradeBetter(bestTradeSoFar, currentTrade, BETTER_TRADE_LESS_HOPS_THRESHOLD)) {
           bestTradeSoFar = currentTrade
         }
       }
-      return bestTradeSoFar
+      return bestTradeSoFar as any
     }
 
     return null
-  }, [allowedPairs, currencyAmountIn, currencyOut, maxHops])
+  }, [allowedPairs, currencyAmountIn, currencyOut, maxHops]) as any
 }
 
 /**
@@ -73,22 +73,22 @@ export function useV2TradeExactOut(
   currencyIn?: Currency,
   currencyAmountOut?: CurrencyAmount<Currency>,
   { maxHops = MAX_HOPS } = {}
-): Trade<Currency, Currency, TradeType.EXACT_OUTPUT> | null {
+): V2Trade<Currency, Currency, TradeType.EXACT_OUTPUT> | null {
   const allowedPairs = useAllCommonPairs(currencyIn, currencyAmountOut?.currency)
 
   return useMemo(() => {
     if (currencyIn && currencyAmountOut && allowedPairs.length > 0) {
       if (maxHops === 1) {
         return (
-          Trade.bestTradeExactOut(allowedPairs, currencyIn, currencyAmountOut, { maxHops: 1, maxNumResults: 1 })[0] ??
+          Trade.bestTradeExactOut(allowedPairs, currencyIn as any, currencyAmountOut as any, { maxHops: 1, maxNumResults: 1 })[0] as any ??
           null
         )
       }
       // search through trades with varying hops, find best trade out of them
-      let bestTradeSoFar: Trade<Currency, Currency, TradeType.EXACT_OUTPUT> | null = null
+      let bestTradeSoFar: V2Trade<Currency, Currency, TradeType.EXACT_OUTPUT> | null = null
       for (let i = 1; i <= maxHops; i++) {
         const currentTrade =
-          Trade.bestTradeExactOut(allowedPairs, currencyIn, currencyAmountOut, { maxHops: i, maxNumResults: 1 })[0] ??
+          Trade.bestTradeExactOut(allowedPairs, currencyIn as any, currencyAmountOut as any, { maxHops: i, maxNumResults: 1 })[0] as any ??
           null
         if (isTradeBetter(bestTradeSoFar, currentTrade, BETTER_TRADE_LESS_HOPS_THRESHOLD)) {
           bestTradeSoFar = currentTrade

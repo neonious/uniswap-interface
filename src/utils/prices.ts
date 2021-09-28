@@ -17,25 +17,14 @@ const INPUT_FRACTION_AFTER_FEE = ONE_HUNDRED_PERCENT.subtract(THIRTY_BIPS_FEE)
 export function computeRealizedLPFeePercent(
   trade: V2Trade<Currency, Currency, TradeType> | V3Trade<Currency, Currency, TradeType>
 ): Percent {
-  let percent: Percent
-  if (trade instanceof V2Trade) {
     // for each hop in our trade, take away the x*y=k price impact from 0.3% fees
     // e.g. for 3 tokens/2 hops: 1 - ((1 - .03) * (1-.03))
-    percent = ONE_HUNDRED_PERCENT.subtract(
-      trade.route.pairs.reduce<Percent>(
+  const percent = ONE_HUNDRED_PERCENT.subtract(
+      (trade as V2Trade<Currency, Currency, TradeType>).route.pairs.reduce<Percent>(
         (currentFee: Percent): Percent => currentFee.multiply(INPUT_FRACTION_AFTER_FEE),
         ONE_HUNDRED_PERCENT
       )
     )
-  } else {
-    percent = ONE_HUNDRED_PERCENT.subtract(
-      trade.route.pools.reduce<Percent>(
-        (currentFee: Percent, pool): Percent =>
-          currentFee.multiply(ONE_HUNDRED_PERCENT.subtract(new Fraction(pool.fee, 1_000_000))),
-        ONE_HUNDRED_PERCENT
-      )
-    )
-  }
 
   return new Percent(percent.numerator, percent.denominator)
 }

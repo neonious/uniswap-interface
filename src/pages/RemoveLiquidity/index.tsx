@@ -1,6 +1,6 @@
 import { Contract } from '@ethersproject/contracts'
 import { TransactionResponse } from '@ethersproject/providers'
-import { Currency, currencyEquals, Percent, WETH9 } from '@uniswap/sdk-core'
+import { Token, Currency, currencyEquals, Percent } from '@uniswap/sdk-core'
 import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { ArrowDown, Plus } from 'react-feather'
 import ReactGA from 'react-ga'
@@ -42,6 +42,8 @@ import { Field } from '../../state/burn/actions'
 import { useWalletModalToggle } from '../../state/application/hooks'
 import { useUserSlippageToleranceWithDefault } from '../../state/user/hooks'
 import { BigNumber } from '@ethersproject/bignumber'
+
+export const WMATIC = new Token(137, '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270', 18, 'WMATIC', 'Wrapped MATIC')
 
 const DEFAULT_REMOVE_LIQUIDITY_SLIPPAGE_TOLERANCE = new Percent(5, 100)
 
@@ -387,8 +389,8 @@ export default function RemoveLiquidity({
   const oneCurrencyIsETH = currencyA?.isEther || currencyB?.isEther
   const oneCurrencyIsWETH = Boolean(
     chainId &&
-      ((currencyA && currencyEquals(WETH9[chainId], currencyA)) ||
-        (currencyB && currencyEquals(WETH9[chainId], currencyB)))
+      ((currencyA && currencyEquals(WMATIC, currencyA)) ||
+        (currencyB && currencyEquals(WMATIC, currencyB)))
   )
 
   const handleSelectCurrencyA = useCallback(
@@ -527,19 +529,19 @@ export default function RemoveLiquidity({
                       <RowBetween style={{ justifyContent: 'flex-end' }}>
                         {oneCurrencyIsETH ? (
                           <StyledInternalLink
-                            to={`/remove/v2/${currencyA?.isEther ? WETH9[chainId].address : currencyIdA}/${
-                              currencyB?.isEther ? WETH9[chainId].address : currencyIdB
+                            to={`/remove/v2/${currencyA?.isEther ? WMATIC.address : currencyIdA}/${
+                              currencyB?.isEther ? WMATIC.address : currencyIdB
                             }`}
                           >
-                            Receive WETH
+                            Receive WMATIC
                           </StyledInternalLink>
                         ) : oneCurrencyIsWETH ? (
                           <StyledInternalLink
                             to={`/remove/v2/${
-                              currencyA && currencyEquals(currencyA, WETH9[chainId]) ? 'ETH' : currencyIdA
-                            }/${currencyB && currencyEquals(currencyB, WETH9[chainId]) ? 'ETH' : currencyIdB}`}
+                              currencyA && currencyEquals(currencyA, WMATIC) ? 'MATIC' : currencyIdA
+                            }/${currencyB && currencyEquals(currencyB, WMATIC) ? 'MATIC' : currencyIdB}`}
                           >
-                            Receive ETH
+                            Receive MATIC
                           </StyledInternalLink>
                         ) : null}
                       </RowBetween>
@@ -558,7 +560,7 @@ export default function RemoveLiquidity({
                     onUserInput(Field.LIQUIDITY_PERCENT, '100')
                   }}
                   showMaxButton={!atMaxAmount}
-                  currency={pair?.liquidityToken}
+                  currency={pair?.liquidityToken as any}
                   pair={pair}
                   id="liquidity-amount"
                 />

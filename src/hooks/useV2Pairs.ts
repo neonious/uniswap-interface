@@ -1,4 +1,4 @@
-import { Pair } from '@uniswap/v2-sdk'
+import { Pair } from '../quickswap-sdk'
 import { useMemo } from 'react'
 import { abi as IUniswapV2PairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 import { Interface } from '@ethersproject/abi'
@@ -52,8 +52,8 @@ export function useV2Pairs(currencies: [Currency | undefined, Currency | undefin
       return [
         PairState.EXISTS,
         new Pair(
-          CurrencyAmount.fromRawAmount(token0, reserve0.toString()),
-          CurrencyAmount.fromRawAmount(token1, reserve1.toString())
+          CurrencyAmount.fromRawAmount(token0, reserve0.toString()) as any,
+          CurrencyAmount.fromRawAmount(token1, reserve1.toString()) as any
         ),
       ]
     })

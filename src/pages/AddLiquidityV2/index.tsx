@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { TransactionResponse } from '@ethersproject/providers'
-import { Currency, CurrencyAmount, currencyEquals, Percent, WETH9 } from '@uniswap/sdk-core'
+import { Token, Currency, CurrencyAmount, currencyEquals, Percent } from '@uniswap/sdk-core'
 import React, { useCallback, useContext, useState } from 'react'
 import { Plus } from 'react-feather'
 import ReactGA from 'react-ga'
@@ -45,6 +45,8 @@ import UnsupportedCurrencyFooter from 'components/swap/UnsupportedCurrencyFooter
 
 const DEFAULT_ADD_V2_SLIPPAGE_TOLERANCE = new Percent(50, 10_000)
 
+export const WMATIC = new Token(137, '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270', 18, 'WMATIC', 'Wrapped MATIC')
+
 export default function AddLiquidity({
   match: {
     params: { currencyIdA, currencyIdB },
@@ -59,8 +61,8 @@ export default function AddLiquidity({
 
   const oneCurrencyIsWETH = Boolean(
     chainId &&
-      ((currencyA && currencyEquals(currencyA, WETH9[chainId])) ||
-        (currencyB && currencyEquals(currencyB, WETH9[chainId])))
+      ((currencyA && currencyEquals(currencyA, WMATIC)) ||
+        (currencyB && currencyEquals(currencyB, WMATIC)))
   )
 
   const toggleWalletModal = useWalletModalToggle() // toggle wallet when disconnected
@@ -296,7 +298,7 @@ export default function AddLiquidity({
           history.push(`/add/v2/${newCurrencyIdB}`)
         }
       } else {
-        history.push(`/add/v2/${currencyIdA ? currencyIdA : 'ETH'}/${newCurrencyIdB}`)
+        history.push(`/add/v2/${currencyIdA ? currencyIdA : 'MATIC'}/${newCurrencyIdB}`)
       }
     },
     [currencyIdA, history, currencyIdB]
@@ -334,7 +336,7 @@ export default function AddLiquidity({
               />
             )}
             pendingText={pendingText}
-            currencyToAdd={pair?.liquidityToken}
+            currencyToAdd={pair?.liquidityToken as any}
           />
           <AutoColumn gap="20px">
             {noLiquidity ||

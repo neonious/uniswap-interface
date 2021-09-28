@@ -1,6 +1,5 @@
 import React, { useContext, useCallback } from 'react'
 import styled, { ThemeContext } from 'styled-components'
-import useENS from '../../hooks/useENS'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { ExternalLink, TYPE } from '../../theme'
 import { ExplorerDataType, getExplorerLink } from '../../utils/getExplorerLink'
@@ -79,7 +78,7 @@ export default function AddressInputPanel({
   const { chainId } = useActiveWeb3React()
   const theme = useContext(ThemeContext)
 
-  const { address, loading, name } = useENS(value)
+  const { address, loading, name } = { address: value, loading: false, name: undefined }
 
   const handleInput = useCallback(
     (event) => {
@@ -117,7 +116,7 @@ export default function AddressInputPanel({
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck="false"
-              placeholder="Wallet Address or ENS name"
+              placeholder="Wallet Address"
               error={error}
               pattern="^(0x[a-fA-F0-9]{40})$"
               onChange={handleInput}

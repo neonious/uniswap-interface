@@ -1,7 +1,4 @@
 import JSBI from 'jsbi'
-import { Trade as V3Trade } from '@uniswap/v3-sdk'
-import { useBestV3TradeExactIn, useBestV3TradeExactOut, V3TradeState } from '../../hooks/useBestV3Trade'
-import useENS from '../../hooks/useENS'
 import { parseUnits } from '@ethersproject/units'
 import { Currency, CurrencyAmount, Percent, TradeType } from '@uniswap/sdk-core'
 import { Trade as V2Trade } from '@uniswap/v2-sdk'
@@ -37,7 +34,7 @@ export function useSwapActionHandlers(): {
       dispatch(
         selectCurrency({
           field,
-          currencyId: currency.isToken ? currency.address : currency.isEther ? 'ETH' : '',
+          currencyId: currency.isToken ? currency.address : currency.isEther ? 'MATIC' : '',
         })
       )
     },
@@ -100,13 +97,13 @@ const BAD_RECIPIENT_ADDRESSES: { [address: string]: true } = {
  * @param checksummedAddress address to check in the pairs and tokens
  */
 function involvesAddress(
-  trade: V2Trade<Currency, Currency, TradeType> | V3Trade<Currency, Currency, TradeType>,
+  trade: V2Trade<Currency, Currency, TradeType>,
   checksummedAddress: string
 ): boolean {
-  const path = trade instanceof V2Trade ? trade.route.path : trade.route.tokenPath
+  const path = trade.route.path
   return (
     path.some((token) => token.address === checksummedAddress) ||
-    (trade instanceof V2Trade
+    (trade
       ? trade.route.pairs.some((pair) => pair.liquidityToken.address === checksummedAddress)
       : false)
   )
@@ -121,8 +118,7 @@ export function useDerivedSwapInfo(
   parsedAmount: CurrencyAmount<Currency> | undefined
   inputError?: string
   v2Trade: V2Trade<Currency, Currency, TradeType> | undefined
-  v3TradeState: { trade: V3Trade<Currency, Currency, TradeType> | null; state: V3TradeState }
-  toggledTrade: V2Trade<Currency, Currency, TradeType> | V3Trade<Currency, Currency, TradeType> | undefined
+  toggledTrade: V2Trade<Currency, Currency, TradeType> | undefined
   allowedSlippage: Percent
 } {
   const { account } = useActiveWeb3React()
@@ -139,7 +135,7 @@ export function useDerivedSwapInfo(
 
   const inputCurrency = useCurrency(inputCurrencyId)
   const outputCurrency = useCurrency(outputCurrencyId)
-  const recipientLookup = useENS(recipient ?? undefined)
+  const recipientLookup = {address: recipient}
   const to: string | null = (recipient === null ? account : recipientLookup.address) ?? null
 
   const relevantTokenBalances = useCurrencyBalances(account ?? undefined, [
@@ -157,11 +153,7 @@ export function useDerivedSwapInfo(
     maxHops: singleHopOnly ? 1 : undefined,
   })
 
-  const bestV3TradeExactIn = useBestV3TradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
-  const bestV3TradeExactOut = useBestV3TradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
-
   const v2Trade = isExactIn ? bestV2TradeExactIn : bestV2TradeExactOut
-  const v3Trade = (isExactIn ? bestV3TradeExactIn : bestV3TradeExactOut) ?? undefined
 
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
@@ -199,7 +191,7 @@ export function useDerivedSwapInfo(
     }
   }
 
-  const toggledTrade = (toggledVersion === Version.v2 ? v2Trade : v3Trade.trade) ?? undefined
+  const toggledTrade = v2Trade ?? undefined
   const allowedSlippage = useSwapSlippageTolerance(toggledTrade)
 
   // compare input balance to max input based on version
@@ -215,7 +207,6 @@ export function useDerivedSwapInfo(
     parsedAmount,
     inputError,
     v2Trade: v2Trade ?? undefined,
-    v3TradeState: v3Trade,
     toggledTrade,
     allowedSlippage,
   }
@@ -225,7 +216,7 @@ function parseCurrencyFromURLParameter(urlParam: any): string {
   if (typeof urlParam === 'string') {
     const valid = isAddress(urlParam)
     if (valid) return valid
-    if (urlParam.toUpperCase() === 'ETH') return 'ETH'
+    if (urlParam.toUpperCase() === 'MATIC') return 'MATIC'
   }
   return ''
 }
@@ -254,7 +245,7 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
   let outputCurrency = parseCurrencyFromURLParameter(parsedQs.outputCurrency)
   if (inputCurrency === '' && outputCurrency === '') {
     // default to ETH input
-    inputCurrency = 'ETH'
+    inputCurrency = 'MATIC'
   } else if (inputCurrency === outputCurrency) {
     // clear output if identical
     outputCurrency = ''

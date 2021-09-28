@@ -56,12 +56,9 @@ export default function ConfirmSwapModal({
   const showAcceptChanges = useMemo(
     () =>
       Boolean(
-        (trade instanceof V2Trade &&
-          originalTrade instanceof V2Trade &&
-          tradeMeaningfullyDiffers(trade, originalTrade)) ||
-          (trade instanceof V3Trade &&
-            originalTrade instanceof V3Trade &&
-            tradeMeaningfullyDiffers(trade, originalTrade))
+        (trade &&
+          originalTrade  &&
+          tradeMeaningfullyDiffers(trade as V2Trade<Currency, Currency, TradeType>, originalTrade as V2Trade<Currency, Currency, TradeType>))
       ),
     [originalTrade, trade]
   )

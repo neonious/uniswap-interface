@@ -1,6 +1,6 @@
 import JSBI from 'jsbi'
 import { Percent, CurrencyAmount, Token } from '@uniswap/sdk-core'
-import { Pair } from '@uniswap/v2-sdk'
+import { Pair } from '../../quickswap-sdk'
 import { darken } from 'polished'
 import React, { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'react-feather'
@@ -56,18 +56,18 @@ interface PositionCardProps {
 export function MinimalPositionCard({ pair, showUnwrapped = false, border }: PositionCardProps) {
   const { account } = useActiveWeb3React()
 
-  const currency0 = showUnwrapped ? pair.token0 : unwrappedToken(pair.token0)
-  const currency1 = showUnwrapped ? pair.token1 : unwrappedToken(pair.token1)
+  const currency0 = showUnwrapped ? pair.token0 as any : unwrappedToken(pair.token0 as any)
+  const currency1 = showUnwrapped ? pair.token1 as any : unwrappedToken(pair.token1 as any)
 
   const [showMore, setShowMore] = useState(false)
 
-  const userPoolBalance = useTokenBalance(account ?? undefined, pair.liquidityToken)
-  const totalPoolTokens = useTotalSupply(pair.liquidityToken)
+  const userPoolBalance = useTokenBalance(account ?? undefined, pair.liquidityToken as any)
+  const totalPoolTokens = useTotalSupply(pair.liquidityToken as any)
 
   const poolTokenPercentage =
     !!userPoolBalance &&
     !!totalPoolTokens &&
-    JSBI.greaterThanOrEqual(totalPoolTokens.quotient, userPoolBalance.quotient)
+    JSBI.greaterThanOrEqual(totalPoolTokens.quotient as any, userPoolBalance.quotient as any) as any
       ? new Percent(userPoolBalance.quotient, totalPoolTokens.quotient)
       : undefined
 
@@ -76,16 +76,16 @@ export function MinimalPositionCard({ pair, showUnwrapped = false, border }: Pos
     !!totalPoolTokens &&
     !!userPoolBalance &&
     // this condition is a short-circuit in the case where useTokenBalance updates sooner than useTotalSupply
-    JSBI.greaterThanOrEqual(totalPoolTokens.quotient, userPoolBalance.quotient)
+    JSBI.greaterThanOrEqual(totalPoolTokens.quotient as any, userPoolBalance.quotient as any) as any
       ? [
-          pair.getLiquidityValue(pair.token0, totalPoolTokens, userPoolBalance, false),
-          pair.getLiquidityValue(pair.token1, totalPoolTokens, userPoolBalance, false),
+          pair.getLiquidityValue(pair.token0 as any, totalPoolTokens as any, userPoolBalance as any, false),
+          pair.getLiquidityValue(pair.token1 as any, totalPoolTokens as any, userPoolBalance as any, false),
         ]
       : [undefined, undefined]
 
   return (
     <>
-      {userPoolBalance && JSBI.greaterThan(userPoolBalance.quotient, JSBI.BigInt(0)) ? (
+      {userPoolBalance && JSBI.greaterThan(userPoolBalance.quotient as any, JSBI.BigInt(0) as any) as any ? (
         <GreyCard border={border}>
           <AutoColumn gap="12px">
             <FixedHeightRow>
@@ -166,13 +166,13 @@ export function MinimalPositionCard({ pair, showUnwrapped = false, border }: Pos
 export default function FullPositionCard({ pair, border, stakedBalance }: PositionCardProps) {
   const { account } = useActiveWeb3React()
 
-  const currency0 = unwrappedToken(pair.token0)
-  const currency1 = unwrappedToken(pair.token1)
+  const currency0 = unwrappedToken(pair.token0 as any)
+  const currency1 = unwrappedToken(pair.token1 as any)
 
   const [showMore, setShowMore] = useState(false)
 
-  const userDefaultPoolBalance = useTokenBalance(account ?? undefined, pair.liquidityToken)
-  const totalPoolTokens = useTotalSupply(pair.liquidityToken)
+  const userDefaultPoolBalance = useTokenBalance(account ?? undefined, pair.liquidityToken as any)
+  const totalPoolTokens = useTotalSupply(pair.liquidityToken as any)
 
   // if staked balance balance provided, add to standard liquidity amount
   const userPoolBalance = stakedBalance ? userDefaultPoolBalance?.add(stakedBalance) : userDefaultPoolBalance
@@ -180,7 +180,7 @@ export default function FullPositionCard({ pair, border, stakedBalance }: Positi
   const poolTokenPercentage =
     !!userPoolBalance &&
     !!totalPoolTokens &&
-    JSBI.greaterThanOrEqual(totalPoolTokens.quotient, userPoolBalance.quotient)
+    JSBI.greaterThanOrEqual(totalPoolTokens.quotient as any, userPoolBalance.quotient as any) as any
       ? new Percent(userPoolBalance.quotient, totalPoolTokens.quotient)
       : undefined
 
@@ -189,14 +189,14 @@ export default function FullPositionCard({ pair, border, stakedBalance }: Positi
     !!totalPoolTokens &&
     !!userPoolBalance &&
     // this condition is a short-circuit in the case where useTokenBalance updates sooner than useTotalSupply
-    JSBI.greaterThanOrEqual(totalPoolTokens.quotient, userPoolBalance.quotient)
+    JSBI.greaterThanOrEqual(totalPoolTokens.quotient as any, userPoolBalance.quotient as any) as any
       ? [
-          pair.getLiquidityValue(pair.token0, totalPoolTokens, userPoolBalance, false),
-          pair.getLiquidityValue(pair.token1, totalPoolTokens, userPoolBalance, false),
+          pair.getLiquidityValue(pair.token0 as any, totalPoolTokens as any, userPoolBalance as any, false),
+          pair.getLiquidityValue(pair.token1 as any, totalPoolTokens as any, userPoolBalance as any, false),
         ]
       : [undefined, undefined]
 
-  const backgroundColor = useColor(pair?.token0)
+  const backgroundColor = useColor(pair?.token0 as any)
 
   return (
     <StyledPositionCard border={border} bgColor={backgroundColor}>
@@ -293,25 +293,8 @@ export default function FullPositionCard({ pair, border, stakedBalance }: Positi
               </Text>
             </FixedHeightRow>
 
-            <ButtonSecondary padding="8px" borderRadius="8px">
-              <ExternalLink
-                style={{ width: '100%', textAlign: 'center' }}
-                href={`https://v2.info.uniswap.org/account/${account}`}
-              >
-                View accrued fees and analytics<span style={{ fontSize: '11px' }}>↗</span>
-              </ExternalLink>
-            </ButtonSecondary>
-            {userDefaultPoolBalance && JSBI.greaterThan(userDefaultPoolBalance.quotient, BIG_INT_ZERO) && (
+            {userDefaultPoolBalance && JSBI.greaterThan(userDefaultPoolBalance.quotient as any, BIG_INT_ZERO) as any && (
               <RowBetween marginTop="10px">
-                <ButtonPrimary
-                  padding="8px"
-                  borderRadius="8px"
-                  as={Link}
-                  to={`/migrate/v2/${pair.liquidityToken.address}`}
-                  width="32%"
-                >
-                  Migrate
-                </ButtonPrimary>
                 <ButtonPrimary
                   padding="8px"
                   borderRadius="8px"
@@ -331,17 +314,6 @@ export default function FullPositionCard({ pair, border, stakedBalance }: Positi
                   Remove
                 </ButtonPrimary>
               </RowBetween>
-            )}
-            {stakedBalance && JSBI.greaterThan(stakedBalance.quotient, BIG_INT_ZERO) && (
-              <ButtonPrimary
-                padding="8px"
-                borderRadius="8px"
-                as={Link}
-                to={`/uni/${currencyId(currency0)}/${currencyId(currency1)}`}
-                width="100%"
-              >
-                Manage Liquidity in Rewards Pool
-              </ButtonPrimary>
             )}
           </AutoColumn>
         )}

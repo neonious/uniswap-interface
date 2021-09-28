@@ -20,7 +20,8 @@ export default memo(function SwapRoute({
 }: {
   trade: V2Trade<Currency, Currency, TradeType> | V3Trade<Currency, Currency, TradeType>
 }) {
-  const tokenPath = trade instanceof V2Trade ? trade.route.path : trade.route.tokenPath
+  console.log("TOKEN PATH ", trade)
+  const tokenPath = (trade as V2Trade<Currency, Currency, TradeType>).route.path
   const theme = useContext(ThemeContext)
   return (
     <Flex flexWrap="wrap" width="100%" justifyContent="flex-start" alignItems="center">
@@ -34,10 +35,8 @@ export default memo(function SwapRoute({
                 {currency.symbol}
               </TYPE.black>
             </Flex>
-            {isLastItem ? null : trade instanceof V2Trade ? (
+            {isLastItem ? null : (
               <ChevronRight size={14} color={theme.text2} />
-            ) : (
-              <LabeledArrow fee={trade.route.pools[i].fee} />
             )}
           </Fragment>
         )

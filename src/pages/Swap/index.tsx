@@ -1,6 +1,5 @@
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { Trade as V2Trade } from '@uniswap/v2-sdk'
-import { Trade as V3Trade } from '@uniswap/v3-sdk'
 import { AdvancedSwapDetails } from 'components/swap/AdvancedSwapDetails'
 import UnsupportedCurrencyFooter from 'components/swap/UnsupportedCurrencyFooter'
 import { MouseoverTooltip, MouseoverTooltipContent } from 'components/Tooltip'
@@ -30,8 +29,6 @@ import TokenWarningModal from '../../components/TokenWarningModal'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { useAllTokens, useCurrency } from '../../hooks/Tokens'
 import { ApprovalState, useApproveCallbackFromTrade } from '../../hooks/useApproveCallback'
-import { V3TradeState } from '../../hooks/useBestV3Trade'
-import useENSAddress from '../../hooks/useENSAddress'
 import { useERC20PermitFromTrade, UseERC20PermitState } from '../../hooks/useERC20Permit'
 import { useIsSwapUnsupported } from '../../hooks/useIsSwapUnsupported'
 import { useSwapCallback } from '../../hooks/useSwapCallback'
@@ -66,12 +63,10 @@ const StyledInfo = styled(Info)`
 `
 
 export default function Swap({ history }: RouteComponentProps) {
-  const loadedUrlParams = useDefaultsFromURLSearch()
-
   // token warning stuff
   const [loadedInputCurrency, loadedOutputCurrency] = [
-    useCurrency(loadedUrlParams?.inputCurrencyId),
-    useCurrency(loadedUrlParams?.outputCurrencyId),
+    useCurrency('MATIC'),
+    useCurrency('MDSIM'),
   ]
   const [dismissTokenWarning, setDismissTokenWarning] = useState<boolean>(false)
   const urlLoadedTokens: Token[] = useMemo(
@@ -106,7 +101,6 @@ export default function Swap({ history }: RouteComponentProps) {
   const { independentField, typedValue, recipient } = useSwapState()
   const {
     v2Trade,
-    v3TradeState: { trade: v3Trade, state: v3TradeState },
     toggledTrade: trade,
     allowedSlippage,
     currencyBalances,
@@ -121,7 +115,7 @@ export default function Swap({ history }: RouteComponentProps) {
     typedValue
   )
   const showWrap: boolean = wrapType !== WrapType.NOT_APPLICABLE
-  const { address: recipientAddress } = useENSAddress(recipient)
+  const recipientAddress = recipient
 
   const parsedAmounts = useMemo(
     () =>
@@ -167,7 +161,7 @@ export default function Swap({ history }: RouteComponentProps) {
   // modal and loading
   const [{ showConfirm, tradeToConfirm, swapErrorMessage, attemptingTxn, txHash }, setSwapState] = useState<{
     showConfirm: boolean
-    tradeToConfirm: V2Trade<Currency, Currency, TradeType> | V3Trade<Currency, Currency, TradeType> | undefined
+    tradeToConfirm: V2Trade<Currency, Currency, TradeType> | undefined
     attemptingTxn: boolean
     swapErrorMessage: string | undefined
     txHash: string | undefined
@@ -187,10 +181,10 @@ export default function Swap({ history }: RouteComponentProps) {
   }
 
   const userHasSpecifiedInputOutput = Boolean(
-    currencies[Field.INPUT] && currencies[Field.OUTPUT] && parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0))
+    currencies[Field.INPUT] && currencies[Field.OUTPUT] && parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0) as any)
   )
   const routeNotFound = !trade?.route
-  const isLoadingRoute = toggledVersion === Version.v3 && V3TradeState.LOADING === v3TradeState
+  const isLoadingRoute = false
 
   // check whether the user has approved the router on the input token
   const [approvalState, approveCallback] = useApproveCallbackFromTrade(trade, allowedSlippage)
@@ -423,54 +417,6 @@ export default function Swap({ history }: RouteComponentProps) {
             ) : null}
 
             <Row style={{ justifyContent: !trade ? 'center' : 'space-between' }}>
-              <RowFixed>
-                {[V3TradeState.VALID, V3TradeState.SYNCING, V3TradeState.NO_ROUTE_FOUND].includes(v3TradeState) &&
-                  (toggledVersion === Version.v3 && isTradeBetter(v3Trade, v2Trade) ? (
-                    <BetterTradeLink version={Version.v2} otherTradeNonexistent={!v3Trade} />
-                  ) : toggledVersion === Version.v2 && isTradeBetter(v2Trade, v3Trade) ? (
-                    <BetterTradeLink version={Version.v3} otherTradeNonexistent={!v2Trade} />
-                  ) : (
-                    toggledVersion === Version.v2 && (
-                      <ButtonGray
-                        width="fit-content"
-                        padding="0.1rem 0.5rem 0.1rem 0.35rem"
-                        as={Link}
-                        to="/swap"
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          height: '24px',
-                          opacity: 0.8,
-                          lineHeight: '120%',
-                          marginLeft: '0.75rem',
-                        }}
-                      >
-                        <ArrowLeft color={theme.text3} size={12} /> &nbsp;
-                        <TYPE.main style={{ lineHeight: '120%' }} fontSize={12}>
-                          <HideSmall>Back to </HideSmall>V3
-                        </TYPE.main>
-                      </ButtonGray>
-                    )
-                  ))}
-
-                {toggledVersion === Version.v3 && trade && isTradeBetter(v2Trade, v3Trade) && (
-                  <ButtonGray
-                    width="fit-content"
-                    padding="0.1rem 0.5rem"
-                    disabled
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      height: '24px',
-                      opacity: 0.4,
-                      marginLeft: '0.25rem',
-                    }}
-                  >
-                    <TYPE.black fontSize={12}>V3</TYPE.black>
-                  </ButtonGray>
-                )}
-              </RowFixed>
               {trade ? (
                 <RowFixed>
                   <TradePrice
