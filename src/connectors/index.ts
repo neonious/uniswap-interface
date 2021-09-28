@@ -13,7 +13,7 @@ const WALLETCONNECT_BRIDGE_URL = process.env.REACT_APP_WALLETCONNECT_BRIDGE_URL
 const NETWORK_URLS: {
   [chainId in any]: string
 } = {
-  137: `https://rpc-mainnet.maticvigil.com/v1/190f10f49d1407fa2f3e182d445b23da4aa0768a`,
+  137: `https://polygon-mainnet.infura.io/v3/a9e12f61bf8340ca902731b661603501`,
 }
 
 const SUPPORTED_CHAIN_IDS = [137]
@@ -35,7 +35,7 @@ export const injected = new InjectedConnector({
 export const walletconnect = new WalletConnectConnector({
   supportedChainIds: SUPPORTED_CHAIN_IDS,
   rpc: {
-    137: 'https://rpc-mainnet.maticvigil.com/v1/190f10f49d1407fa2f3e182d445b23da4aa0768a',
+    137: 'https://polygon-mainnet.infura.io/v3/a9e12f61bf8340ca902731b661603501',
   },
   bridge: WALLETCONNECT_BRIDGE_URL,
   qrcode: true,
