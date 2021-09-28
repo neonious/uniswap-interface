@@ -16,7 +16,7 @@ const WETH_ONLY: ChainTokenList = {
 // used to construct intermediary pairs for trading
 export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   ...WETH_ONLY,
-  [137]: [...WETH_ONLY[137], DAI, USDC, USDT, QUICK, WMATIC, WBTC],
+  [137]: [...WETH_ONLY[137], DAI, USDC, USDT, WMATIC],
 }
 export const ADDITIONAL_BASES: { [chainId in any]?: { [tokenAddress: string]: Token[] } } = {
   [137]: {
@@ -38,7 +38,7 @@ export const SUGGESTED_BASES: Partial<ChainTokenList> = {
 // used to construct the list of all pairs we consider by default in the frontend
 export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
   ...WETH_ONLY,
-  [137]: [...WETH_ONLY[137], MDSIM, WMATIC, QUICK, DAI, USDC, USDT],
+  [137]: [...WETH_ONLY[137], MDSIM, WMATIC, DAI, USDC, USDT],
 }
 
 export const PINNED_PAIRS: { readonly [chainId in any]?: [Token, Token][] } = {
