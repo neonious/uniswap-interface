@@ -63,11 +63,14 @@ const StyledInfo = styled(Info)`
 `
 
 export default function Swap({ history }: RouteComponentProps) {
+  const loadedUrlParams = useDefaultsFromURLSearch()
+
   // token warning stuff
   const [loadedInputCurrency, loadedOutputCurrency] = [
-    useCurrency('MATIC'),
-    useCurrency('MDSIM'),
+    useCurrency(loadedUrlParams?.inputCurrencyId),
+    useCurrency(loadedUrlParams?.outputCurrencyId),
   ]
+
   const [dismissTokenWarning, setDismissTokenWarning] = useState<boolean>(false)
   const urlLoadedTokens: Token[] = useMemo(
     () => [loadedInputCurrency, loadedOutputCurrency]?.filter((c): c is Token => c?.isToken ?? false) ?? [],

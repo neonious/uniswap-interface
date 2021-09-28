@@ -46,8 +46,6 @@ export default function CurrencyLogo({
         break;
       }
     }
-    if(!uri)
-    console.log("FOR ", currency)
 
   const uriLocations = useHttpLocations(uri);
 

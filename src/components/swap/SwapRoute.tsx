@@ -20,7 +20,6 @@ export default memo(function SwapRoute({
 }: {
   trade: V2Trade<Currency, Currency, TradeType> | V3Trade<Currency, Currency, TradeType>
 }) {
-  console.log("TOKEN PATH ", trade)
   const tokenPath = (trade as V2Trade<Currency, Currency, TradeType>).route.path
   const theme = useContext(ThemeContext)
   return (
