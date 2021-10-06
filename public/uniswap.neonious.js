@@ -22,10 +22,10 @@ function render() {
     ctx.fillStyle = "white";
     if(w < 700) {
         ctx.font = "bold 12pt Arial";
-        ctx.fillText("MDSIM/USDC", 55, 45);
+        ctx.fillText("MDSIM/USD", 35, 45);
    } else {
         ctx.font = "bold 16pt Arial";
-        ctx.fillText("MDSIM/USDC Chart", 35, 45);
+        ctx.fillText("MDSIM/USD Chart", 35, 45);
     }
 
     ctx.font = "12pt Arial";
