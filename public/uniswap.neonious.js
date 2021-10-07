@@ -22,10 +22,10 @@ function render() {
     ctx.fillStyle = "white";
     if(w < 700) {
         ctx.font = "bold 12pt Arial";
-        ctx.fillText("MDSIM/USD", 35, 45);
+        ctx.fillText("MDSIM/USD", 20, 45);
    } else {
         ctx.font = "bold 16pt Arial";
-        ctx.fillText("MDSIM/USD Chart", 35, 45);
+        ctx.fillText("MDSIM/USD Chart", 20, 45);
     }
 
     ctx.font = "12pt Arial";
@@ -65,10 +65,10 @@ function render() {
             ctx.beginPath();
             const y = dh + h - h * (i - low) / (high - low);
             ctx.moveTo(0, y);
-            ctx.lineTo(w - 130, y);
+            ctx.lineTo(w - 125, y);
             ctx.stroke();
 
-            const txt = i.toFixed(4) + ' USDC';
+            const txt = i.toFixed(4) + ' USD';
             if(!noVals)
                 ctx.fillText(txt, w - 20 - ctx.measureText(txt).width, y + 6);
     
@@ -233,7 +233,7 @@ window.addEventListener('load', () => {
         Math.floor(chart.clientWidth / MIN_CANDLE_WIDTH_START)).then((data) => {
         chartVals = data.vals;
         candleWidth = Math.round(chart.clientWidth / data.numCandles);
-        chartX = (chart.clientWidth - 130) - data.vals.length / 5 * candleWidth;
+        chartX = (chart.clientWidth - 125) - data.vals.length / 5 * candleWidth;
         lastWidth = chart.clientWidth;
         window.requestAnimationFrame(render);
     });
